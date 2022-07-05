@@ -44,17 +44,16 @@ export default function App() {
           data={defaultData}
           columns={[
             {
-              id: "firstName",
-              key: "firstName",
+              accessorKey: "firstName",
               header: (data) => {
                 return "First Name";
               },
             },
-            { key: "lastName", header: "Last Name" },
-            { key: "status", header: "Status" },
-            { key: "age", header: "Age" },
-            { key: "visits", header: "Visits", enableSorting: false },
-            { key: "actions", header: "Actions" },
+            { accessorKey: "lastName", header: "Last Name" },
+            { accessorKey: "status", header: "Status" },
+            { accessorKey: "age", header: "Age" },
+            { accessorKey: "visits", header: "Visits", enableSorting: false },
+            { accessorKey: "actions", header: "Actions" },
           ]}
         />
       </div>

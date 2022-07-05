@@ -1,77 +1,41 @@
 import * as React from "react";
 import {
-  AccessorFn,
-  ColumnDef,
-  createTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  OnChangeFn,
-  Overwrite,
-  Render,
   RowSelectionState,
   SortingState,
-  Table as ITable,
-  TableGenerics,
-  useTableInstance,
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  RowData,
+  OnChangeFn,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import { makeCheckboxHeader } from "./IndeterminateCheckbox";
 import { TableRow } from "./TableRow";
 
-type ColumnTest<TAccessor> = Overwrite<
-  ColumnDef<
-    Overwrite<
-      TableGenerics,
-      {
-        Value: TableGenerics["Row"][TAccessor];
-      }
-    >
-  >,
-  {
-    id?: string;
-  }
->;
-
-export type _Table<RowType extends object> = ITable<
-  Overwrite<
-    { Row: never; Renderer: Render; Rendered: React.ReactNode | JSX.Element },
-    { Row: RowType }
-  >
->;
-
-export interface TableColumn<RowType extends object> extends ColumnTest<keyof RowType> {
-  key: keyof RowType | AccessorFn<RowType>;
-}
-
-interface Props<RowType extends object> {
-  data: RowType[];
-  columns: TableColumn<RowType>[];
+interface Props<TData extends RowData> {
+  data: TData[];
+  columns: ColumnDef<TData>[];
   options?: {
     rowSelection: RowSelectionState;
     setRowSelection: OnChangeFn<RowSelectionState>;
   };
 }
 
-export function Table<RowType extends object>({ data, columns, options }: Props<RowType>) {
+export function Table<TData extends RowData>({ data, columns, options }: Props<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  const table = React.useMemo(() => createTable().setRowType<RowType>(), []);
-
   const tableColumns = React.useMemo(() => {
-    let cols = columns.map((column) =>
-      table.createDataColumn(column.key, {
-        ...column,
-        cell: (info: any) => info.getValue(),
-      } as any),
-    );
+    let cols = columns;
 
     if (options?.rowSelection) {
-      cols = [makeCheckboxHeader(table), ...cols];
+      cols = [makeCheckboxHeader(), ...cols];
     }
 
     return cols;
-  }, [columns, options]);
+  }, [columns, options?.rowSelection]);
 
-  const instance = useTableInstance(table, {
+  const table = useReactTable({
     data,
     columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
@@ -79,15 +43,15 @@ export function Table<RowType extends object>({ data, columns, options }: Props<
     onRowSelectionChange: options?.setRowSelection,
     getSortedRowModel: getSortedRowModel(),
     state: {
-      rowSelection: options?.rowSelection,
       sorting,
+      rowSelection: options?.rowSelection,
     },
   });
 
   return (
     <table className="w-full overflow-hidden whitespace-nowrap max-h-64">
       <thead>
-        {instance.getHeaderGroups().map((headerGroup) => (
+        {table.getHeaderGroups().map((headerGroup) => (
           <tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
               const canSort = header.id === "actions" ? false : header.column.getCanSort();
@@ -107,7 +71,7 @@ export function Table<RowType extends object>({ data, columns, options }: Props<
                     header.column.getToggleSortingHandler()?.(event);
                   }}
                 >
-                  {header.isPlaceholder ? null : header.renderHeader()}
+                  {flexRender(header.column.columnDef.header, header.getContext())}
                   {{
                     asc: " 🔼",
                     desc: " 🔽",
@@ -119,7 +83,7 @@ export function Table<RowType extends object>({ data, columns, options }: Props<
         ))}
       </thead>
       <tbody>
-        {instance.getRowModel().rows.map((row) => (
+        {table.getRowModel().rows.map((row) => (
           <TableRow key={row.id} row={row} />
         ))}
       </tbody>

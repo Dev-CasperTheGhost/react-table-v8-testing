@@ -1,5 +1,5 @@
+import { ColumnDef, RowData } from "@tanstack/react-table";
 import * as React from "react";
-import { _Table } from "./Table";
 
 export function IndeterminateCheckbox({
   indeterminate,
@@ -17,15 +17,15 @@ export function IndeterminateCheckbox({
   return <input type="checkbox" ref={ref} className={className + " cursor-pointer"} {...rest} />;
 }
 
-export function makeCheckboxHeader<RowType extends object>(table: _Table<RowType>) {
-  return table.createDisplayColumn({
+export function makeCheckboxHeader<TData extends RowData>(): ColumnDef<TData> {
+  return {
     id: "select",
-    header: ({ instance }) => (
+    header: ({ table }) => (
       <IndeterminateCheckbox
         {...{
-          checked: instance.getIsAllRowsSelected(),
-          indeterminate: instance.getIsSomeRowsSelected(),
-          onChange: instance.getToggleAllRowsSelectedHandler(),
+          checked: table.getIsAllRowsSelected(),
+          indeterminate: table.getIsSomeRowsSelected(),
+          onChange: table.getToggleAllRowsSelectedHandler(),
         }}
       />
     ),
@@ -38,5 +38,5 @@ export function makeCheckboxHeader<RowType extends object>(table: _Table<RowType
         }}
       />
     ),
-  });
+  };
 }
