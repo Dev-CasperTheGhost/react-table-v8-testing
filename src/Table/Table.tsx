@@ -42,6 +42,7 @@ export function Table<TData extends RowData>({ data, columns, options }: Props<T
     onSortingChange: setSorting,
     onRowSelectionChange: options?.setRowSelection,
     getSortedRowModel: getSortedRowModel(),
+    enableRowSelection: true,
     state: {
       sorting,
       rowSelection: options?.rowSelection,
